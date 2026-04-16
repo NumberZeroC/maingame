@@ -43,6 +43,12 @@ export class GameSDK {
     track: (event: string, data?: Record<string, any>) => this.trackEvent(event, data),
   }
 
+  leaderboard = {
+    submitScore: (score: number, extraData?: Record<string, any>) =>
+      this.submitScore(score, extraData),
+    getRanking: (type?: 'global' | 'friends', limit?: number) => this.getRanking(type, limit),
+  }
+
   constructor(config: SDKConfig) {
     this.config = {
       origin: window.location.origin,
@@ -180,6 +186,26 @@ export class GameSDK {
     }
   }
 
+  private async submitScore(score: number, extraData?: Record<string, any>): Promise<void> {
+    try {
+      await this.sendMessage<void>('sdk:leaderboard:submitScore', { score, extraData })
+    } catch (error) {
+      throw new GameSDKError('SUBMIT_SCORE_FAILED', 'Failed to submit score', error)
+    }
+  }
+
+  private async getRanking(type?: 'global' | 'friends', limit?: number): Promise<any[]> {
+    try {
+      const response = await this.sendMessage<any[]>('sdk:leaderboard:getRanking', {
+        type: type || 'global',
+        limit: limit || 100,
+      })
+      return response
+    } catch (error) {
+      throw new GameSDKError('GET_RANKING_FAILED', 'Failed to get ranking', error)
+    }
+  }
+
   destroy(): void {
     window.removeEventListener('message', this.handleMessage.bind(this))
     this.pendingRequests.forEach(({ timeout }) => clearTimeout(timeout))
@@ -188,9 +214,16 @@ export class GameSDK {
   }
 }
 
+export { GameSDKError } from './types'
+export type {
+  SDKUser,
+  SDKConfig,
+  SDKMessage,
+  GenerateTextOptions,
+  GenerateImageOptions,
+  SDKMessageType,
+} from './types'
+
 export function createGameSDK(config: SDKConfig): GameSDK {
   return new GameSDK(config)
 }
-
-export { GameSDKError } from './types'
-export type { SDKUser, SDKConfig, SDKMessage } from './types'

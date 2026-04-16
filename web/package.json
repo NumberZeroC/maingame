@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "build:sdk": "vite build --config vite.config.sdk.ts && vite build --config vite.config.host-sdk.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.99.0",

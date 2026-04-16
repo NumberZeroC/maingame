@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Minimal Game Template</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+      }
+      .container {
+        max-width: 400px;
+        width: 100%;
+        padding: 20px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 24px;
+        backdrop-filter: blur(10px);
+      }
+      h1 {
+        margin: 0 0 16px 0;
+        font-size: 24px;
+      }
+      p {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        opacity: 0.8;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: white;
+        color: #667eea;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.1s;
+      }
+      button:hover {
+        transform: scale(1.02);
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .loading {
+        text-align: center;
+        padding: 40px;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px auto;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .result {
+        text-align: center;
+        padding: 20px;
+      }
+      .score {
+        font-size: 48px;
+        font-weight: bold;
+        margin: 16px 0;
+      }
+      input {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 16px;
+        margin: 12px 0;
+      }
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .error {
+        background: rgba(255, 100, 100, 0.2);
+        padding: 12px;
+        border-radius: 8px;
+        margin: 12px 0;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>🎮 Minimal Game</h1>
+        <p>A simple game template demonstrating SDK usage</p>
+
+        <div id="loading" class="loading" style="display: none">
+          <div class="spinner"></div>
+          <p>Loading...</p>
+        </div>
+
+        <div id="start-screen">
+          <p>Click to start a simple AI-powered game</p>
+          <button onclick="startGame()">Start Game</button>
+        </div>
+
+        <div id="game-screen" style="display: none">
+          <p id="question">Loading question...</p>
+          <input type="text" id="answer" placeholder="Type your answer..." />
+          <button onclick="submitAnswer()" id="submitBtn">Submit</button>
+          <div id="error-msg" class="error" style="display: none"></div>
+        </div>
+
+        <div id="result-screen" style="display: none">
+          <div class="result">
+            <p>Game Complete!</p>
+            <div class="score" id="final-score">0</div>
+            <button onclick="restartGame()">Play Again</button>
+            <button
+              onclick="exitGame()"
+              style="background: rgba(255, 255, 255, 0.2); color: white; margin-top: 8px"
+            >
+              Exit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/sdk/game-sdk.umd.js"></script>
+    <script>
+      let sdk = null
+      let user = null
+      let gameState = {
+        score: 0,
+        rounds: 0,
+        totalRounds: 3,
+        currentQuestion: null,
+      }
+
+      window.GameLifecycle = {
+        async onInit(config) {
+          console.log('[Game] onInit', config)
+          sdk = new GameSDK.GameSDK(config)
+
+          sdk.onReady(async () => {
+            console.log('[Game] SDK Ready')
+            try {
+              user = await sdk.getUser()
+              console.log('[Game] User loaded:', user.nickname)
+            } catch (err) {
+              console.warn('[Game] Could not load user:', err)
+            }
+          })
+        },
+
+        async onLoad() {
+          console.log('[Game] onLoad')
+          document.getElementById('loading').style.display = 'block'
+          document.getElementById('start-screen').style.display = 'none'
+
+          await new Promise((resolve) => setTimeout(resolve, 500))
+
+          document.getElementById('loading').style.display = 'none'
+          document.getElementById('start-screen').style.display = 'block'
+        },
+
+        onStart() {
+          console.log('[Game] onStart')
+        },
+
+        onPause() {
+          console.log('[Game] onPause')
+        },
+
+        onResume() {
+          console.log('[Game] onResume')
+        },
+
+        onFinish(result) {
+          console.log('[Game] onFinish', result)
+          return {
+            score: gameState.score,
+            duration: gameState.rounds * 10,
+            achievements: gameState.score >= 2 ? ['good_player'] : [],
+          }
+        },
+
+        onDestroy() {
+          console.log('[Game] onDestroy')
+          if (sdk) {
+            sdk.destroy()
+            sdk = null
+          }
+        },
+      }
+
+      async function startGame() {
+        document.getElementById('start-screen').style.display = 'none'
+        document.getElementById('game-screen').style.display = 'block'
+
+        gameState.score = 0
+        gameState.rounds = 0
+
+        await nextRound()
+
+        sdk.analytics.track('game_start', { userId: user?.id })
+      }
+
+      async function nextRound() {
+        if (gameState.rounds >= gameState.totalRounds) {
+          endGame()
+          return
+        }
+
+        gameState.rounds++
+        document.getElementById('answer').value = ''
+        document.getElementById('submitBtn').disabled = false
+        document.getElementById('error-msg').style.display = 'none'
+
+        try {
+          document.getElementById('question').textContent = 'Generating question...'
+
+          const prompt =
+            'Generate a simple yes/no question about a common animal. Just output the question, nothing else.'
+          const question = await sdk.ai.generateText(prompt, { maxTokens: 50, temperature: 0.7 })
+
+          gameState.currentQuestion = question.trim()
+          document.getElementById('question').textContent =
+            `Round ${gameState.rounds}: ${gameState.currentQuestion}`
+        } catch (err) {
+          console.error('[Game] AI error:', err)
+          document.getElementById('error-msg').textContent =
+            'AI service error. Using fallback question.'
+          document.getElementById('error-msg').style.display = 'block'
+          gameState.currentQuestion = 'Is a dolphin a fish?'
+          document.getElementById('question').textContent =
+            `Round ${gameState.rounds}: ${gameState.currentQuestion}`
+        }
+      }
+
+      async function submitAnswer() {
+        const answer = document.getElementById('answer').value.trim().toLowerCase()
+        if (!answer) return
+
+        document.getElementById('submitBtn').disabled = true
+
+        try {
+          const prompt = `Question: "${gameState.currentQuestion}"\nUser answered: "${answer}"\nIs this answer correct? Reply only "yes" or "no".`
+          const result = await sdk.ai.generateText(prompt, { maxTokens: 5, temperature: 0 })
+
+          if (result.toLowerCase().includes('yes')) {
+            gameState.score++
+            document.getElementById('error-msg').textContent = '✓ Correct!'
+            document.getElementById('error-msg').style.background = 'rgba(100,255,100,0.2)'
+            document.getElementById('error-msg').style.display = 'block'
+          } else {
+            document.getElementById('error-msg').textContent = '✗ Incorrect'
+            document.getElementById('error-msg').style.background = 'rgba(255,100,100,0.2)'
+            document.getElementById('error-msg').style.display = 'block'
+          }
+
+          sdk.analytics.track('answer_submit', {
+            round: gameState.rounds,
+            correct: result.toLowerCase().includes('yes'),
+          })
+
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          await nextRound()
+        } catch (err) {
+          console.error('[Game] Error:', err)
+          document.getElementById('error-msg').textContent = 'Error processing answer. Try again.'
+          document.getElementById('error-msg').style.display = 'block'
+          document.getElementById('submitBtn').disabled = false
+        }
+      }
+
+      function endGame() {
+        document.getElementById('game-screen').style.display = 'none'
+        document.getElementById('result-screen').style.display = 'block'
+        document.getElementById('final-score').textContent = gameState.score
+
+        sdk.analytics.track('game_finish', { score: gameState.score })
+
+        window.parent.postMessage(
+          {
+            type: 'game:finish',
+            payload: {
+              score: gameState.score,
+              duration: gameState.rounds * 10,
+              achievements: gameState.score >= 2 ? ['good_player'] : [],
+            },
+          },
+          '*'
+        )
+      }
+
+      function restartGame() {
+        document.getElementById('result-screen').style.display = 'none'
+        document.getElementById('start-screen').style.display = 'block'
+        gameState = { score: 0, rounds: 0, totalRounds: 3, currentQuestion: null }
+      }
+
+      function exitGame() {
+        window.parent.postMessage({ type: 'game:finish', payload: { score: gameState.score } }, '*')
+      }
+    </script>
+  </body>
+</html>

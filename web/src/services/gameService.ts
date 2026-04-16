@@ -8,6 +8,7 @@ import {
   SubmitScoreRequest,
   SubmitScoreResponse,
 } from '../types'
+import { GameManifest, GameSession } from '../sdk'
 
 export const gameService = {
   async getGames(): Promise<Game[]> {
@@ -18,6 +19,36 @@ export const gameService = {
   async getGameById(id: string): Promise<Game> {
     const response = await api.get<Game>(`/games/${id}`)
     return response.data
+  },
+
+  async getGameManifest(id: string): Promise<GameManifest> {
+    const response = await api.get<GameManifest>(`/games/${id}/manifest`)
+    return response.data
+  },
+
+  async getGameSession(gameId: string): Promise<GameSession | null> {
+    const response = await api.get<GameSession | null>(`/games/${gameId}/session`)
+    return response.data
+  },
+
+  async saveGameSession(gameId: string, key: string, value: any): Promise<void> {
+    await api.post(`/games/${gameId}/session/save`, { key, value })
+  },
+
+  async loadGameSession(gameId: string, key: string): Promise<any> {
+    const response = await api.get(`/games/${gameId}/session/load`, { params: { key } })
+    return response.data?.value
+  },
+
+  async clearGameSession(gameId: string): Promise<void> {
+    await api.delete(`/games/${gameId}/session/clear`)
+  },
+
+  async finishGameSession(
+    gameId: string,
+    result: { score?: number; duration?: number; data?: any; achievements?: string[] }
+  ): Promise<void> {
+    await api.post(`/games/${gameId}/session/finish`, result)
   },
 
   async playGame(data: PlayGameRequest): Promise<PlayGameResponse> {

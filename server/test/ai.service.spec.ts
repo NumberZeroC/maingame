@@ -1,12 +1,14 @@
 import { AiService } from '../src/modules/ai/ai.service'
 import { AICoreService } from '../src/modules/ai/ai-core.service'
 import { AIConfigService } from '../src/modules/ai/ai-config.service'
+import { AIConfigFileService } from '../src/modules/ai/ai-config-file.service'
 import { ConfigService } from '@nestjs/config'
 
 describe('AiService', () => {
   let aiService: AiService
   let coreService: AICoreService
   let configService: AIConfigService
+  let configFileService: AIConfigFileService
 
   beforeAll(() => {
     require('dotenv').config({ path: '.env' })
@@ -15,7 +17,8 @@ describe('AiService', () => {
   beforeEach(() => {
     const nestConfigService = new ConfigService()
     configService = new AIConfigService(nestConfigService)
-    coreService = new AICoreService(configService)
+    configFileService = new AIConfigFileService(nestConfigService)
+    coreService = new AICoreService(configService, configFileService)
     aiService = new AiService(coreService)
   })
 

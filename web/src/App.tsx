@@ -4,7 +4,7 @@ import { useAuthStore } from './stores/authStore'
 import { useGetMe } from './hooks/useUser'
 import { ErrorBoundary } from './common'
 import HomePage from './pages/HomePage'
-import GamePage from './pages/GamePage'
+import GameRuntimePage from './pages/GameRuntimePage'
 import GameDetailPage from './pages/GameDetailPage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import ProfilePage from './pages/ProfilePage'
@@ -12,7 +12,6 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import NotFoundPage from './pages/NotFoundPage'
 import Layout from './components/Layout'
-import DrawGuessGame from './games/draw-guess/DrawGuessGame'
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, accessToken } = useAuthStore()
@@ -53,8 +52,7 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="game/:id" element={<GameDetailPage />} />
-              <Route path="play/:id" element={<GamePage />} />
-              <Route path="play/draw-guess" element={<DrawGuessGame />} />
+              <Route path="play/:id" element={<GameRuntimePage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>

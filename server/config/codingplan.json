@@ -1,0 +1,100 @@
+{
+  "enabled": true,
+  "currentModel": "qwen3.5-plus",
+  "apiKey": "sk-sp-1103f012953e45d984ab8fbd486e6e16",
+  "baseUrl": "https://coding.dashscope.aliyuncs.com/v1",
+  "models": [
+    {
+      "id": "qwen3-coder-plus",
+      "name": "Qwen3 Coder Plus",
+      "maxTokens": 65536,
+      "thinking": false,
+      "pricing": {
+        "input": 0.0035,
+        "output": 0.007,
+        "unit": "per_1k_tokens"
+      }
+    },
+    {
+      "id": "qwen3.5-plus",
+      "name": "Qwen3.5 Plus",
+      "maxTokens": 65536,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 8192
+      },
+      "pricing": {
+        "input": 0.002,
+        "output": 0.006,
+        "unit": "per_1k_tokens"
+      }
+    },
+    {
+      "id": "qwen3-max-2026-01-23",
+      "name": "Qwen3 Max",
+      "maxTokens": 32768,
+      "thinking": false,
+      "pricing": {
+        "input": 0.004,
+        "output": 0.008,
+        "unit": "per_1k_tokens"
+      }
+    },
+    {
+      "id": "glm-5",
+      "name": "GLM-5",
+      "maxTokens": 16384,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 8192
+      },
+      "pricing": {
+        "input": 0.001,
+        "output": 0.001,
+        "unit": "per_1k_tokens"
+      }
+    },
+    {
+      "id": "glm-4.7",
+      "name": "GLM-4.7",
+      "maxTokens": 16384,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 8192
+      },
+      "pricing": {
+        "input": 0.001,
+        "output": 0.001,
+        "unit": "per_1k_tokens"
+      }
+    },
+    {
+      "id": "MiniMax-M2.5",
+      "name": "MiniMax M2.5",
+      "maxTokens": 24576,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 8192
+      },
+      "pricing": {
+        "input": 0.002,
+        "output": 0.002,
+        "unit": "per_1k_tokens"
+      }
+    },
+    {
+      "id": "kimi-k2.5",
+      "name": "Kimi K2.5",
+      "maxTokens": 32768,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 8192
+      },
+      "pricing": {
+        "input": 0.003,
+        "output": 0.003,
+        "unit": "per_1k_tokens"
+      }
+    }
+  ]
+}

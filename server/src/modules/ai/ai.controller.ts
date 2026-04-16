@@ -9,6 +9,8 @@ import {
 } from '@nestjs/swagger'
 import { AICoreService } from './ai-core.service'
 import { AIConfigService } from './ai-config.service'
+import { AIConfigFileService } from './ai-config-file.service'
+import { AIConfigWatcherService } from './ai-config-watcher.service'
 import { GenerateTextDto, ChatDto, GenerateImageDto } from './dto'
 import { AIProviderType } from './interfaces'
 
@@ -18,7 +20,9 @@ import { AIProviderType } from './interfaces'
 export class AiController {
   constructor(
     private readonly aiCoreService: AICoreService,
-    private readonly configService: AIConfigService
+    private readonly configService: AIConfigService,
+    private readonly configFileService: AIConfigFileService,
+    private readonly configWatcherService: AIConfigWatcherService
   ) {}
 
   @Post('text/generate')
@@ -59,10 +63,22 @@ export class AiController {
   @ApiOperation({ summary: 'List available AI providers' })
   @ApiResponse({ status: 200, description: 'List of providers' })
   listProviders() {
+    const fileConfig = this.configFileService.getConfig()
+    const envConfig = this.configService.getConfig()
+
+    const useFileConfig =
+      fileConfig.providers[AIProviderType.ALIYUN_CODINGPLAN]?.enabled ||
+      Object.values(fileConfig.providers).some((p) => p.enabled)
+
+    const config = useFileConfig ? fileConfig : envConfig
+
     return {
       providers: this.aiCoreService.getAvailableProviders(),
-      defaultProvider: this.configService.getDefaultProvider(),
-      fallbackOrder: this.configService.getFallbackOrder(),
+      defaultProvider: config.defaultProvider,
+      fallbackOrder: config.fallbackOrder,
+      source: useFileConfig ? 'config_file' : 'env',
+      codingPlanEnabled: this.configFileService.isCodingPlanEnabled(),
+      currentCodingPlanModel: this.configFileService.getCurrentCodingPlanModel(),
     }
   }
 
@@ -102,14 +118,26 @@ export class AiController {
   @ApiOperation({ summary: 'Get AI configuration' })
   @ApiResponse({ status: 200, description: 'AI configuration' })
   getConfig() {
-    const config = this.configService.getConfig()
+    const fileConfig = this.configFileService.getConfig()
+    const envConfig = this.configService.getConfig()
+
     return {
-      defaultProvider: config.defaultProvider,
-      fallbackEnabled: config.fallbackEnabled,
-      fallbackOrder: config.fallbackOrder,
-      rateLimit: config.rateLimit,
-      costTracking: config.costTracking,
-      enabledProviders: this.configService.getEnabledProviders(),
+      defaultProvider: fileConfig.defaultProvider,
+      fallbackEnabled: fileConfig.fallbackEnabled,
+      fallbackOrder: fileConfig.fallbackOrder,
+      rateLimit: fileConfig.rateLimit,
+      costTracking: fileConfig.costTracking,
+      enabledProviders: this.configFileService.getEnabledProviders(),
+      codingPlanEnabled: this.configFileService.isCodingPlanEnabled(),
+      currentCodingPlanModel: this.configFileService.getCurrentCodingPlanModel(),
+      providers: fileConfig.providers,
     }
+  }
+
+  @Post('reload')
+  @ApiOperation({ summary: 'Reload AI configuration from files' })
+  @ApiResponse({ status: 200, description: 'Configuration reloaded' })
+  reloadConfig() {
+    return this.configWatcherService.manualReload()
   }
 }

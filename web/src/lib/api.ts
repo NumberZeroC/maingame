@@ -17,7 +17,12 @@ interface RequestConfigWithId extends InternalAxiosRequestConfig {
 
 function getBaseUrl(): string {
   if (typeof window !== 'undefined') {
-    return `${window.location.protocol}//${window.location.hostname}:4000`
+    const hostname = window.location.hostname
+    const protocol = window.location.protocol
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return `${protocol}//${hostname}:3000/api`
+    }
+    return `${protocol}//${hostname}:4000`
   }
   return 'http://localhost:4000'
 }
@@ -99,8 +104,13 @@ class ApiClient {
           this.retryCount.delete(requestId)
         }
 
+        const errorMessage = error.response?.data?.message
+        const messageStr = Array.isArray(errorMessage)
+          ? errorMessage.join(', ')
+          : errorMessage || error.message || 'An error occurred'
+
         const apiError: ApiError = {
-          message: error.response?.data?.message || error.message || 'An error occurred',
+          message: messageStr,
           statusCode: error.response?.status || 500,
           error: error.response?.data?.error,
         }

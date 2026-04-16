@@ -1,3 +1,4 @@
+export { HostSDK, createHostSDK } from './HostSDK'
 export { GameSDK, createGameSDK } from './GameSDK'
 export type {
   SDKUser,
@@ -9,5 +10,12 @@ export type {
   GenerateImageOptions,
   StorageData,
   AnalyticsEvent,
+  GameSDKError,
+  GameLifecycleStatus,
+  GameResult,
+  HostSDKConfig,
+  HostMessageType,
+  HostMessage,
+  GameManifest,
+  GameSession,
 } from './types'
-export { GameSDKError } from './types'

@@ -1,0 +1,42 @@
+{
+  "id": "minimal-game-template",
+  "name": "Minimal Game Template",
+  "slug": "minimal-game-template",
+  "version": "1.0.0",
+  "description": "Minimal game template for AI Game Platform",
+  "author": "Your Name",
+  "category": ["template"],
+  "tags": ["template", "minimal"],
+
+  "entry": "/index.html",
+  "icon": "/assets/icon.png",
+  "thumbnail": "/assets/thumbnail.png",
+
+  "config": {
+    "maxPlayers": 1,
+    "avgDuration": 5,
+    "difficulty": "easy",
+    "orientation": "portrait",
+    "minAge": 6
+  },
+
+  "aiRequirements": {
+    "llm": {
+      "enabled": true,
+      "model": "gpt-3.5-turbo",
+      "avgRequests": 5
+    },
+    "imageGen": {
+      "enabled": false
+    },
+    "speech": {
+      "enabled": false
+    }
+  },
+
+  "permissions": ["user.info", "storage", "ai.text"],
+
+  "assets": {
+    "preload": []
+  }
+}

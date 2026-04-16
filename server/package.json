@@ -5,12 +5,19 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
-    "start": "node dist/main",
-    "start:prod": "node dist/main",
+    "build:cli": "esbuild scripts/ai-cli.ts --bundle --platform=node --outfile=dist/scripts/ai-cli.js",
+    "start": "node dist/src/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "ai": "node dist/scripts/ai-cli.js",
+    "ai:list": "node dist/scripts/ai-cli.js list",
+    "ai:current": "node dist/scripts/ai-cli.js current",
+    "ai:switch": "node dist/scripts/ai-cli.js switch",
+    "ai:use": "node dist/scripts/ai-cli.js use",
+    "ai:config": "node dist/scripts/ai-cli.js config"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.0",
@@ -51,6 +58,9 @@
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
+    "chalk": "4",
+    "commander": "^14.0.3",
+    "esbuild": "^0.28.0",
     "eslint": "^8.56.0",
     "jest": "^29.7.0",
     "source-map-support": "^0.5.21",

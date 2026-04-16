@@ -67,10 +67,11 @@ function RegisterPage() {
               <input
                 type="text"
                 className="input"
-                placeholder="请输入手机号"
+                placeholder="请输入11位手机号，如13812345678"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
+              <p className="text-xs text-gray-400 mt-xs">格式：1开头的11位数字</p>
             </div>
 
             <div>
@@ -125,6 +126,7 @@ function RegisterPage() {
                   )}
                 </button>
               </div>
+              <p className="text-xs text-gray-400 mt-xs">至少8位，包含大小写字母和数字</p>
             </div>
 
             <div>

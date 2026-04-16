@@ -13,12 +13,20 @@ import {
 } from './interfaces'
 import { AIProviderInterface } from './interfaces/ai-provider.interface'
 import { AIConfigService } from './ai-config.service'
+import { AIConfigFileService } from './ai-config-file.service'
 import {
   AliyunCodingPlanProvider,
   ZhipuProvider,
   DeepSeekProvider,
   OpenAIProvider,
 } from './providers'
+
+interface GameQuota {
+  gameId: string
+  dailyLimit: number
+  usedToday: number
+  lastReset: Date
+}
 
 @Injectable()
 export class AICoreService {
@@ -27,68 +35,61 @@ export class AICoreService {
   private readonly requestCounts: Map<string, { count: number; resetAt: number }> = new Map()
   private readonly tokenCounts: Map<string, { count: number; resetAt: number }> = new Map()
   private readonly totalUsageStats: Map<AIProviderType, UsageStats> = new Map()
+  private readonly gameQuotas: Map<string, GameQuota> = new Map()
 
-  constructor(private readonly configService: AIConfigService) {
+  constructor(
+    private readonly configService: AIConfigService,
+    private readonly configFileService: AIConfigFileService
+  ) {
     this.initializeProviders()
+    this.initializeGameQuotas()
   }
 
-  private initializeProviders(): void {
-    const config = this.configService.getConfig()
+  private initializeGameQuotas(): void {
+    this.gameQuotas.set('default', {
+      gameId: 'default',
+      dailyLimit: 100,
+      usedToday: 0,
+      lastReset: new Date(),
+    })
+  }
 
-    for (const [type, providerConfig] of Object.entries(config.providers)) {
-      if (!providerConfig.enabled) continue
-
-      const providerType = type as AIProviderType
-      let provider: AIProviderInterface | null = null
-
-      try {
-        switch (providerType) {
-          case AIProviderType.ALIYUN_CODINGPLAN:
-            provider = new AliyunCodingPlanProvider(
-              providerConfig.apiKey,
-              providerConfig.apiSecret,
-              providerConfig.model,
-              providerConfig.baseUrl
-            )
-            break
-          case AIProviderType.ZHIPU:
-            provider = new ZhipuProvider(
-              providerConfig.apiKey,
-              providerConfig.apiSecret,
-              providerConfig.model,
-              providerConfig.baseUrl
-            )
-            break
-          case AIProviderType.DEEPSEEK:
-            provider = new DeepSeekProvider(
-              providerConfig.apiKey,
-              providerConfig.apiSecret,
-              providerConfig.model,
-              providerConfig.baseUrl
-            )
-            break
-          case AIProviderType.OPENAI:
-            provider = new OpenAIProvider(
-              providerConfig.apiKey,
-              providerConfig.apiSecret,
-              providerConfig.model,
-              providerConfig.baseUrl
-            )
-            break
-        }
-
-        if (provider && provider.isAvailable()) {
-          this.providers.set(providerType, provider)
-          this.logger.log(`Initialized AI provider: ${providerType}`)
-        }
-      } catch (error) {
-        this.logger.error(`Failed to initialize provider ${providerType}: ${error}`)
-      }
+  private getGameQuota(gameId: string): GameQuota {
+    if (!this.gameQuotas.has(gameId)) {
+      this.gameQuotas.set(gameId, {
+        gameId,
+        dailyLimit: 50,
+        usedToday: 0,
+        lastReset: new Date(),
+      })
     }
+    return this.gameQuotas.get(gameId)!
+  }
+
+  private checkGameQuota(gameId: string): boolean {
+    const quota = this.getGameQuota(gameId)
+    const now = new Date()
+    const lastReset = new Date(quota.lastReset)
+
+    if (
+      now.getDate() !== lastReset.getDate() ||
+      now.getMonth() !== lastReset.getMonth() ||
+      now.getFullYear() !== lastReset.getFullYear()
+    ) {
+      quota.usedToday = 0
+      quota.lastReset = now
+    }
+
+    return quota.usedToday < quota.dailyLimit
+  }
+
+  private incrementGameQuota(gameId: string): void {
+    const quota = this.getGameQuota(gameId)
+    quota.usedToday++
   }
 
   private checkRateLimit(provider: AIProviderType): boolean {
-    const config = this.configService.getRateLimitConfig()
+    const config = this.configFileService.getRateLimitConfig()
     const now = Date.now()
     const minuteKey = `${provider}_${Math.floor(now / 60000)}`
 
@@ -103,7 +104,7 @@ export class AICoreService {
   }
 
   private updateTokenCount(provider: AIProviderType, tokens: number): void {
-    const config = this.configService.getRateLimitConfig()
+    const config = this.configFileService.getRateLimitConfig()
     const now = Date.now()
     const minuteKey = `${provider}_${Math.floor(now / 60000)}`
 
@@ -119,9 +120,14 @@ export class AICoreService {
 
   private async executeWithFallback<T>(
     operation: (provider: AIProviderInterface) => Promise<T>,
-    operationName: string
+    operationName: string,
+    gameId?: string
   ): Promise<T> {
-    const fallbackOrder = this.configService.getFallbackOrder()
+    if (gameId && !this.checkGameQuota(gameId)) {
+      throw new Error(`Game ${gameId} has exceeded daily AI quota`)
+    }
+
+    const fallbackOrder = this.configFileService.getFallbackOrder()
     const errors: Error[] = []
 
     for (const providerType of fallbackOrder) {
@@ -137,7 +143,11 @@ export class AICoreService {
         this.logger.debug(`Executing ${operationName} with provider: ${providerType}`)
         const result = await operation(provider)
 
-        if (this.configService.isCostTrackingEnabled()) {
+        if (gameId) {
+          this.incrementGameQuota(gameId)
+        }
+
+        if (this.configFileService.isCostTrackingEnabled()) {
           const stats = provider.getUsageStats()
           const existing = this.totalUsageStats.get(providerType) || {
             provider: providerType,
@@ -170,31 +180,45 @@ export class AICoreService {
 
   async generateText(
     prompt: string,
-    options?: TextGenerationOptions
+    options?: TextGenerationOptions,
+    gameId?: string
   ): Promise<TextGenerationResult> {
-    return this.executeWithFallback(async (provider) => {
-      const result = await provider.generateText(prompt, options)
-      this.updateTokenCount(result.provider, result.usage.totalTokens)
-      return result
-    }, 'generateText')
+    return this.executeWithFallback(
+      async (provider) => {
+        const result = await provider.generateText(prompt, options)
+        this.updateTokenCount(result.provider, result.usage.totalTokens)
+        return result
+      },
+      'generateText',
+      gameId
+    )
   }
 
-  async chat(messages: ChatMessage[], options?: ChatOptions): Promise<ChatResult> {
-    return this.executeWithFallback(async (provider) => {
-      const result = await provider.chat(messages, options)
-      this.updateTokenCount(result.provider, result.usage.totalTokens)
-      return result
-    }, 'chat')
+  async chat(messages: ChatMessage[], options?: ChatOptions, gameId?: string): Promise<ChatResult> {
+    return this.executeWithFallback(
+      async (provider) => {
+        const result = await provider.chat(messages, options)
+        this.updateTokenCount(result.provider, result.usage.totalTokens)
+        return result
+      },
+      'chat',
+      gameId
+    )
   }
 
   async generateImage(
     prompt: string,
-    options?: ImageGenerationOptions
+    options?: ImageGenerationOptions,
+    gameId?: string
   ): Promise<ImageGenerationResult> {
-    return this.executeWithFallback(async (provider) => {
-      const result = await provider.generateImage(prompt, options)
-      return result
-    }, 'generateImage')
+    return this.executeWithFallback(
+      async (provider) => {
+        const result = await provider.generateImage(prompt, options)
+        return result
+      },
+      'generateImage',
+      gameId
+    )
   }
 
   async listModels(providerType?: AIProviderType): Promise<AIModel[]> {
@@ -234,6 +258,21 @@ export class AICoreService {
     return total
   }
 
+  getGameQuotaStatus(gameId: string): { used: number; limit: number; remaining: number } {
+    const quota = this.getGameQuota(gameId)
+    return {
+      used: quota.usedToday,
+      limit: quota.dailyLimit,
+      remaining: quota.dailyLimit - quota.usedToday,
+    }
+  }
+
+  setGameQuota(gameId: string, dailyLimit: number): void {
+    const quota = this.getGameQuota(gameId)
+    quota.dailyLimit = dailyLimit
+    this.gameQuotas.set(gameId, quota)
+  }
+
   estimateCost(
     providerType: AIProviderType,
     model: string,
@@ -243,5 +282,12 @@ export class AICoreService {
     const provider = this.providers.get(providerType)
     if (!provider) return 0
     return provider.estimateCost(promptTokens, completionTokens, model)
+  }
+
+  reloadProviders(): void {
+    this.logger.log('Reloading AI providers...')
+    this.providers.clear()
+    this.initializeProviders()
+    this.logger.log(`Providers reloaded: ${Array.from(this.providers.keys()).join(', ')}`)
   }
 }
