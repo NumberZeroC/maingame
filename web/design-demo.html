@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI游戏平台 - 设计演示</title>
+  <link rel="stylesheet" href="design-demo.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-brand">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="url(#gradient)" stroke-width="4"/>
+            <circle cx="16" cy="16" r="6" fill="url(#gradient)"/>
+            <defs>
+              <linearGradient id="gradient" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#6366F1"/>
+                <stop offset="100%" stop-color="#EC4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="brand-text">AI游戏平台</span>
+        </div>
+      </div>
+      
+      <nav class="navbar-menu">
+        <a href="#home" class="nav-link active">首页</a>
+        <a href="#games" class="nav-link">游戏</a>
+        <a href="#leaderboard" class="nav-link">排行</a>
+      </nav>
+      
+      <div class="navbar-actions">
+        <button class="btn-icon search-btn" aria-label="搜索">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="9" r="6"/>
+            <path d="M14 14l3 3"/>
+          </svg>
+        </button>
+        <button class="btn-avatar">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="container hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            AI驱动的<span class="gradient-text">游戏世界</span>
+          </h1>
+          <p class="hero-subtitle">
+            探索无限可能，体验AI带来的全新游戏乐趣
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+              </svg>
+              开始探索
+            </button>
+            <button class="btn btn-outline btn-lg">
+              了解更多
+            </button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">精品游戏</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-number">100万+</div>
+            <div class="stat-label">活跃玩家</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-number">4.9</div>
+            <div class="stat-label">平均评分</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hot Games Section -->
+    <section class="section" id="games">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">🔥</span>
+            热门推荐
+          </h2>
+          <a href="#" class="section-more">查看更多 →</a>
+        </div>
+        
+        <div class="game-grid">
+          <!-- Game Card 1 -->
+          <div class="game-card">
+            <div class="game-card-media">
+              <img src="https://picsum.photos/seed/game1/400/300" alt="AI画图猜词" loading="lazy">
+              <div class="game-card-overlay">
+                <button class="btn btn-primary btn-play">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5.04 2.27A1 1 0 003.5 3.09v9.82a1 1 0 001.54.82l7.88-4.91a1 1 0 000-1.64L5.04 2.27z"/>
+                  </svg>
+                  立即玩
+                </button>
+              </div>
+              <div class="game-card-badges">
+                <span class="badge badge-ai">AI</span>
+                <span class="badge badge-hot">HOT</span>
+              </div>
+            </div>
+            <div class="game-card-body">
+              <h3 class="game-card-title">AI画图猜词</h3>
+              <p class="game-card-desc">AI生成趣味图像，考验你的想象力</p>
+              <div class="game-card-footer">
+                <div class="game-card-meta">
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="#FBBF24">
+                      <path d="M8 12l-4.702 2.472.898-5.236L.292 5.528l5.257-.764L8 0l2.451 4.764 5.257.764-3.904 3.708.898 5.236z"/>
+                    </svg>
+                    4.8
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM4.5 8a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"/>
+                      <path d="M8 4.5a.75.75 0 01.75.75v2.5a.75.75 0 01-.75.75H6a.75.75 0 010-1.5h1.25V5.25A.75.75 0 018 4.5z"/>
+                    </svg>
+                    5分钟
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 2a6 6 0 00-6 6h12a6 6 0 00-6-6z"/>
+                    </svg>
+                    10万+
+                  </span>
+                </div>
+                <div class="game-card-tags">
+                  <span class="tag">休闲</span>
+                  <span class="tag">益智</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game Card 2 -->
+          <div class="game-card">
+            <div class="game-card-media">
+              <img src="https://picsum.photos/seed/game2/400/300" alt="AI对话冒险" loading="lazy">
+              <div class="game-card-overlay">
+                <button class="btn btn-primary btn-play">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5.04 2.27A1 1 0 003.5 3.09v9.82a1 1 0 001.54.82l7.88-4.91a1 1 0 000-1.64L5.04 2.27z"/>
+                  </svg>
+                  立即玩
+                </button>
+              </div>
+              <div class="game-card-badges">
+                <span class="badge badge-ai">AI</span>
+              </div>
+            </div>
+            <div class="game-card-body">
+              <h3 class="game-card-title">AI对话冒险</h3>
+              <p class="game-card-desc">与AI对话，开启你的奇幻冒险之旅</p>
+              <div class="game-card-footer">
+                <div class="game-card-meta">
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="#FBBF24">
+                      <path d="M8 12l-4.702 2.472.898-5.236L.292 5.528l5.257-.764L8 0l2.451 4.764 5.257.764-3.904 3.708.898 5.236z"/>
+                    </svg>
+                    4.9
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM4.5 8a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"/>
+                      <path d="M8 4.5a.75.75 0 01.75.75v2.5a.75.75 0 01-.75.75H6a.75.75 0 010-1.5h1.25V5.25A.75.75 0 018 4.5z"/>
+                    </svg>
+                    15分钟
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 2a6 6 0 00-6 6h12a6 6 0 00-6-6z"/>
+                    </svg>
+                    50万+
+                  </span>
+                </div>
+                <div class="game-card-tags">
+                  <span class="tag">冒险</span>
+                  <span class="tag">剧情</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game Card 3 -->
+          <div class="game-card">
+            <div class="game-card-media">
+              <img src="https://picsum.photos/seed/game3/400/300" alt="AI诗歌接龙" loading="lazy">
+              <div class="game-card-overlay">
+                <button class="btn btn-primary btn-play">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5.04 2.27A1 1 0 003.5 3.09v9.82a1 1 0 001.54.82l7.88-4.91a1 1 0 000-1.64L5.04 2.27z"/>
+                  </svg>
+                  立即玩
+                </button>
+              </div>
+              <div class="game-card-badges">
+                <span class="badge badge-ai">AI</span>
+                <span class="badge badge-new">NEW</span>
+              </div>
+            </div>
+            <div class="game-card-body">
+              <h3 class="game-card-title">AI诗歌接龙</h3>
+              <p class="game-card-desc">与AI对诗，感受古典诗词之美</p>
+              <div class="game-card-footer">
+                <div class="game-card-meta">
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="#FBBF24">
+                      <path d="M8 12l-4.702 2.472.898-5.236L.292 5.528l5.257-.764L8 0l2.451 4.764 5.257.764-3.904 3.708.898 5.236z"/>
+                    </svg>
+                    4.7
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM4.5 8a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"/>
+                      <path d="M8 4.5a.75.75 0 01.75.75v2.5a.75.75 0 01-.75.75H6a.75.75 0 010-1.5h1.25V5.25A.75.75 0 018 4.5z"/>
+                    </svg>
+                    3分钟
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 2a6 6 0 00-6 6h12a6 6 0 00-6-6z"/>
+                    </svg>
+                    5万+
+                  </span>
+                </div>
+                <div class="game-card-tags">
+                  <span class="tag">文艺</span>
+                  <span class="tag">益智</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game Card 4 -->
+          <div class="game-card">
+            <div class="game-card-media">
+              <img src="https://picsum.photos/seed/game4/400/300" alt="AI故事接龙" loading="lazy">
+              <div class="game-card-overlay">
+                <button class="btn btn-primary btn-play">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M5.04 2.27A1 1 0 003.5 3.09v9.82a1 1 0 001.54.82l7.88-4.91a1 1 0 000-1.64L5.04 2.27z"/>
+                  </svg>
+                  立即玩
+                </button>
+              </div>
+              <div class="game-card-badges">
+                <span class="badge badge-ai">AI</span>
+              </div>
+            </div>
+            <div class="game-card-body">
+              <h3 class="game-card-title">AI故事接龙</h3>
+              <p class="game-card-desc">多人协作，共创精彩故事</p>
+              <div class="game-card-footer">
+                <div class="game-card-meta">
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="#FBBF24">
+                      <path d="M8 12l-4.702 2.472.898-5.236L.292 5.528l5.257-.764L8 0l2.451 4.764 5.257.764-3.904 3.708.898 5.236z"/>
+                    </svg>
+                    4.6
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM4.5 8a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"/>
+                      <path d="M8 4.5a.75.75 0 01.75.75v2.5a.75.75 0 01-.75.75H6a.75.75 0 010-1.5h1.25V5.25A.75.75 0 018 4.5z"/>
+                    </svg>
+                    10分钟
+                  </span>
+                  <span class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 2a6 6 0 00-6 6h12a6 6 0 00-6-6z"/>
+                    </svg>
+                    8万+
+                  </span>
+                </div>
+                <div class="game-card-tags">
+                  <span class="tag">社交</span>
+                  <span class="tag">创意</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">🎮</span>
+            分类浏览
+          </h2>
+        </div>
+        
+        <div class="category-grid">
+          <div class="category-card">
+            <div class="category-icon">🧩</div>
+            <h3>益智</h3>
+            <p>12款游戏</p>
+          </div>
+          <div class="category-card">
+            <div class="category-icon">🎨</div>
+            <h3>创意</h3>
+            <p>8款游戏</p>
+          </div>
+          <div class="category-card">
+            <div class="category-icon">🏰</div>
+            <h3>冒险</h3>
+            <p>6款游戏</p>
+          </div>
+          <div class="category-card">
+            <div class="category-icon">👥</div>
+            <h3>社交</h3>
+            <p>10款游戏</p>
+          </div>
+          <div class="category-card">
+            <div class="category-icon">🎯</div>
+            <h3>休闲</h3>
+            <p>15款游戏</p>
+          </div>
+          <div class="category-card">
+            <div class="category-icon">⚔️</div>
+            <h3>竞技</h3>
+            <p>7款游戏</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Game -->
+    <section class="section">
+      <div class="container">
+        <div class="featured-game">
+          <div class="featured-bg">
+            <img src="https://picsum.photos/seed/featured/1200/600" alt="">
+          </div>
+          <div class="featured-content">
+            <div class="featured-info">
+              <span class="badge badge-featured">本周推荐</span>
+              <h2>AI对话冒险</h2>
+              <p>与AI对话，开启你的奇幻冒险之旅。每个选择都将影响故事走向，体验独一无二的剧情体验。</p>
+              <div class="featured-meta">
+                <span class="meta-item">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="#FBBF24">
+                    <path d="M8 12l-4.702 2.472.898-5.236L.292 5.528l5.257-.764L8 0l2.451 4.764 5.257.764-3.904 3.708.898 5.236z"/>
+                  </svg>
+                  4.9
+                </span>
+                <span class="meta-item">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 8a3 3 0 100-6 3 3 0 000 6zm0 2a6 6 0 00-6 6h12a6 6 0 00-6-6z"/>
+                  </svg>
+                  50万+玩家
+                </span>
+                <span class="meta-item">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM4.5 8a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"/>
+                    <path d="M8 4.5a.75.75 0 01.75.75v2.5a.75.75 0 01-.75.75H6a.75.75 0 010-1.5h1.25V5.25A.75.75 0 018 4.5z"/>
+                  </svg>
+                  平均15分钟
+                </span>
+              </div>
+              <div class="featured-tags">
+                <span class="tag">冒险</span>
+                <span class="tag">剧情</span>
+                <span class="tag">AI驱动</span>
+              </div>
+              <button class="btn btn-primary btn-lg">
+                立即开始
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile Tab Bar -->
+  <nav class="tabbar">
+    <a href="#home" class="tabbar-item active">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3L4 9v12h5v-7h6v7h5V9l-8-6z"/>
+      </svg>
+      <span>首页</span>
+    </a>
+    <a href="#games" class="tabbar-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="6" width="20" height="12" rx="2"/>
+        <circle cx="8" cy="12" r="2"/>
+        <path d="M18 9v6M15 12h6"/>
+      </svg>
+      <span>游戏</span>
+    </a>
+    <a href="#leaderboard" class="tabbar-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 21V11M16 21V7M12 21V3"/>
+      </svg>
+      <span>排行</span>
+    </a>
+    <a href="#profile" class="tabbar-item">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 21v-1a4 4 0 014-4h8a4 4 0 014 4v1"/>
+      </svg>
+      <span>我的</span>
+    </a>
+  </nav>
+
+  <script src="design-demo.js"></script>
+</body>
+</html>
