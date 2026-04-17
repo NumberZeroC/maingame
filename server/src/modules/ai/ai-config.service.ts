@@ -23,6 +23,14 @@ export class AIConfigService {
         baseUrl: process.env.ALIYUN_CODINGPLAN_BASE_URL,
         enabled: !!process.env.ALIYUN_CODINGPLAN_API_KEY,
         priority: parseInt(process.env.ALIYUN_CODINGPLAN_PRIORITY || '0', 10),
+        imageApiKey: process.env.ALIYUN_DASHSCOPE_API_KEY || '',
+        imageBaseUrl:
+          process.env.ALIYUN_DASHSCOPE_BASE_URL || 'https://dashscope.aliyuncs.com/api/v1',
+        imageModel: process.env.ALIYUN_IMAGE_MODEL || 'wan2.7-image',
+        imageFallbackModels: (
+          process.env.ALIYUN_IMAGE_FALLBACK_MODELS ||
+          'wan2.7-image-pro,qwen-image-2.0-pro,qwen-image-2.0'
+        ).split(','),
       },
       [AIProviderType.ZHIPU]: {
         apiKey: process.env.ZHIPU_API_KEY || '',

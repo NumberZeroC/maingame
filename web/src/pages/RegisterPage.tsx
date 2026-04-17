@@ -36,6 +36,26 @@ function RegisterPage() {
       return
     }
 
+    if (password.length < 8) {
+      setToast({ message: '密码至少需要8个字符', type: 'error' })
+      return
+    }
+
+    if (!/[a-z]/.test(password)) {
+      setToast({ message: '密码需要包含小写字母', type: 'error' })
+      return
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setToast({ message: '密码需要包含大写字母', type: 'error' })
+      return
+    }
+
+    if (!/\d/.test(password)) {
+      setToast({ message: '密码需要包含数字', type: 'error' })
+      return
+    }
+
     if (password !== confirmPassword) {
       setToast({ message: '两次密码不一致', type: 'error' })
       return

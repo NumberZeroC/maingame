@@ -27,13 +27,16 @@ async function bootstrap() {
 
   const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
-    : ['http://localhost:3000', 'http://localhost:4000']
+    : []
 
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' ? allowedOrigins : true,
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'Accept', 'Origin'],
+    exposedHeaders: ['X-Request-Id'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 
   const config = new DocumentBuilder()
@@ -46,10 +49,12 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document)
 
   const port = process.env.PORT || 4000
-  await app.listen(port, '0.0.0.0')
+  const host = process.env.HOST || '0.0.0.0'
+  const publicIp = process.env.PUBLIC_IP || '8.130.165.124'
+  await app.listen(port, host)
 
-  console.log(`🚀 Server running on http://localhost:${port}`)
-  console.log(`📚 API documentation available at http://localhost:${port}/api`)
+  console.log(`🚀 Server running on http://${publicIp}:${port}`)
+  console.log(`📚 API documentation available at http://${publicIp}:${port}/api`)
   console.log(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`)
 }
 

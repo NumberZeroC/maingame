@@ -1,50 +1,23 @@
 import GameCard from '../components/GameCard'
 import { Link } from 'react-router-dom'
-
-const mockGames = [
-  {
-    id: 'draw-guess',
-    name: 'AI画图猜词',
-    description: 'AI生成趣味图像，考验你的想象力',
-    thumbnail: 'https://picsum.photos/seed/game1/400/300',
-    rating: 4.8,
-    players: 100000,
-    category: ['休闲', '益智'],
-    badges: ['ai', 'hot'] as ('ai' | 'hot' | 'new')[],
-  },
-  {
-    id: 'ai-adventure',
-    name: 'AI对话冒险',
-    description: '与AI对话，开启你的奇幻冒险之旅',
-    thumbnail: 'https://picsum.photos/seed/game2/400/300',
-    rating: 4.9,
-    players: 500000,
-    category: ['冒险', '剧情'],
-    badges: ['ai'] as ('ai' | 'hot' | 'new')[],
-  },
-  {
-    id: 'ai-poetry',
-    name: 'AI诗歌接龙',
-    description: '与AI对诗，感受古典诗词之美',
-    thumbnail: 'https://picsum.photos/seed/game3/400/300',
-    rating: 4.7,
-    players: 50000,
-    category: ['文艺', '益智'],
-    badges: ['ai', 'new'] as ('ai' | 'hot' | 'new')[],
-  },
-  {
-    id: 'ai-story',
-    name: 'AI故事接龙',
-    description: '多人协作，共创精彩故事',
-    thumbnail: 'https://picsum.photos/seed/game4/400/300',
-    rating: 4.6,
-    players: 80000,
-    category: ['社交', '创意'],
-    badges: ['ai'] as ('ai' | 'hot' | 'new')[],
-  },
-]
+import { useGetGames } from '../hooks/useGames'
 
 function HomePage() {
+  const { data: games, isLoading, error } = useGetGames()
+
+  const publishedGames = games?.filter((g) => g.status === 'published') || []
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-md">⚠️</div>
+          <p className="text-gray-600">加载游戏失败，请稍后重试</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <section className="relative bg-gradient-to-r from-primary to-secondary py-2xl px-md overflow-hidden">
@@ -60,12 +33,17 @@ function HomePage() {
           </h1>
           <p className="text-lg text-white/90 mb-lg">探索无限可能，体验AI带来的全新游戏乐趣</p>
           <div className="flex gap-md justify-center mb-lg">
-            <Link to="/game/draw-guess" className="btn btn-primary btn-lg">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              开始探索
-            </Link>
+            {publishedGames.length > 0 && (
+              <Link
+                to={`/game/${publishedGames[0].slug || publishedGames[0]._id}`}
+                className="btn btn-primary btn-lg"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                开始探索
+              </Link>
+            )}
             <Link
               to="/leaderboard"
               className="btn btn-lg bg-white/10 text-white border-2 border-white/30 hover:bg-white/20"
@@ -75,17 +53,26 @@ function HomePage() {
           </div>
           <div className="flex justify-center gap-lg bg-white/10 rounded-xl p-lg backdrop-blur-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">50+</div>
+              <div className="text-2xl font-bold text-white">{publishedGames.length}+</div>
               <div className="text-sm text-white/80">精品游戏</div>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">100万+</div>
-              <div className="text-sm text-white/80">活跃玩家</div>
+              <div className="text-2xl font-bold text-white">
+                {publishedGames.reduce((sum, g) => sum + (g.stats?.playCount || 0), 0)}
+              </div>
+              <div className="text-sm text-white/80">游玩次数</div>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">4.9</div>
+              <div className="text-2xl font-bold text-white">
+                {publishedGames.length > 0
+                  ? (
+                      publishedGames.reduce((sum, g) => sum + (g.stats?.rating || 0), 0) /
+                      publishedGames.length
+                    ).toFixed(1)
+                  : '0'}
+              </div>
               <div className="text-sm text-white/80">平均评分</div>
             </div>
           </div>
@@ -106,11 +93,31 @@ function HomePage() {
               查看更多 →
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
-            {mockGames.map((game) => (
-              <GameCard key={game.id} {...game} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-gray-100 rounded-xl h-64 animate-pulse" />
+              ))}
+            </div>
+          ) : publishedGames.length === 0 ? (
+            <div className="text-center py-lg text-gray-500">暂无游戏</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
+              {publishedGames.map((game) => (
+                <GameCard
+                  key={game._id}
+                  id={game.slug || game._id}
+                  name={game.name}
+                  description={game.description || ''}
+                  thumbnail={game.thumbnail || 'https://picsum.photos/seed/game/400/300'}
+                  rating={game.stats?.rating || 4.5}
+                  players={game.stats?.playCount || 0}
+                  category={game.category || []}
+                  badges={game.category?.includes('AI') ? ['ai'] : []}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -142,7 +149,9 @@ function HomePage() {
                             : '⚔️'}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-xs">{cat}</h3>
-                <p className="text-sm text-gray-500">{Math.floor(Math.random() * 15) + 5}款游戏</p>
+                <p className="text-sm text-gray-500">
+                  {publishedGames.filter((g) => g.category?.includes(cat)).length}款游戏
+                </p>
               </div>
             ))}
           </div>

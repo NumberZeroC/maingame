@@ -80,7 +80,7 @@ export abstract class BaseAIProvider implements AIProviderInterface {
 
   abstract getModelPricing(
     model: string
-  ): { input: number; output: number; unit: 'per_1k_tokens' | 'per_1m_tokens' } | null
+  ): { input: number; output: number; unit: 'per_1k_tokens' | 'per_1m_tokens' | 'per_image' } | null
 
   protected initUsageStats(): UsageStats {
     return {

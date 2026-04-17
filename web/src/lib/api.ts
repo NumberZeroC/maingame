@@ -16,15 +16,7 @@ interface RequestConfigWithId extends InternalAxiosRequestConfig {
 }
 
 function getBaseUrl(): string {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname
-    const protocol = window.location.protocol
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      return `${protocol}//${hostname}:3000/api`
-    }
-    return `${protocol}//${hostname}:4000`
-  }
-  return 'http://localhost:4000'
+  return '/api'
 }
 
 function generateRequestId(): string {

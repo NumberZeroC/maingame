@@ -14,7 +14,7 @@ export interface AIModel {
   pricing?: {
     input: number
     output: number
-    unit: 'per_1k_tokens' | 'per_1m_tokens'
+    unit: 'per_1k_tokens' | 'per_1m_tokens' | 'per_image'
   }
 }
 
@@ -37,9 +37,10 @@ export interface ChatOptions extends TextGenerationOptions {
 
 export interface ImageGenerationOptions {
   model?: string
-  size?: '256x256' | '512x512' | '1024x1024' | '1024x1792' | '1792x1024'
+  size?: '256x256' | '512x512' | '1024x1024' | '1024x1792' | '1792x1024' | string
   quality?: 'standard' | 'hd'
   n?: number
+  style?: string
 }
 
 export interface TextGenerationResult {
@@ -80,6 +81,10 @@ export interface ProviderConfig {
   baseUrl?: string
   enabled: boolean
   priority: number
+  imageApiKey?: string
+  imageBaseUrl?: string
+  imageModel?: string
+  imageFallbackModels?: string[]
 }
 
 export interface AIConfig {

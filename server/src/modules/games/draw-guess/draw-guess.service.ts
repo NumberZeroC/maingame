@@ -120,16 +120,16 @@ export class DrawGuessService {
   async startGame(userId: string, category?: Category): Promise<DrawGuessGame> {
     const { word, category: selectedCategory } = this.getRandomWord(category)
 
-    let imageUrl = `https://picsum.photos/seed/${encodeURIComponent(word)}/400/300`
+    let imageUrl = `https://picsum.photos/seed/${encodeURIComponent(word)}-${Date.now()}/400/300`
 
     try {
-      const imagePrompt = `A simple, clear illustration of ${word} in a cartoon style, suitable for a guessing game. The image should be easy to recognize.`
+      const imagePrompt = `A cute, simple cartoon illustration of "${word}" (Chinese word). Make it colorful, child-friendly, and easy to recognize. Style: flat design, minimal details.`
       const imageResult = await this.aiService.generateImage(imagePrompt)
       if (imageResult) {
         imageUrl = imageResult
       }
     } catch (error) {
-      console.log('AI image generation failed, using placeholder:', error)
+      console.log('AI image generation failed, using placeholder image')
     }
 
     const game = new this.gameModel({

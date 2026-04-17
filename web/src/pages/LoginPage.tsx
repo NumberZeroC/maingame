@@ -19,6 +19,11 @@ function LoginPage() {
       return
     }
 
+    if (password.length < 8) {
+      setToast({ message: '密码至少需要8个字符', type: 'error' })
+      return
+    }
+
     loginMutation.mutate(
       { phone, password },
       {

@@ -5,7 +5,7 @@ import { gameService } from '../services/gameService'
 import { GameManifest, GameSDKError, GameResult } from '../sdk'
 
 function GameRuntimePage() {
-  const { gameId } = useParams<{ gameId: string }>()
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
   const {
@@ -13,12 +13,15 @@ function GameRuntimePage() {
     isLoading,
     error,
   } = useQuery<GameManifest>({
-    queryKey: ['game-manifest', gameId],
+    queryKey: ['game-manifest', id],
     queryFn: async () => {
-      const response = await gameService.getGameManifest(gameId!)
+      const games = await gameService.getGames()
+      const game = games.find((g) => g.slug === id || g._id === id)
+      if (!game) throw new Error('Game not found')
+      const response = await gameService.getGameManifest(game._id)
       return response
     },
-    enabled: !!gameId,
+    enabled: !!id,
   })
 
   const handleComplete = (result: GameResult) => {
@@ -33,7 +36,7 @@ function GameRuntimePage() {
     navigate(-1)
   }
 
-  if (!gameId) {
+  if (!id) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-white text-center">
@@ -48,9 +51,7 @@ function GameRuntimePage() {
 
   if (isLoading) {
     return (
-      <GameLoading
-        manifest={{ id: gameId, slug: gameId, name: '加载中...', version: '1.0', entry: '' }}
-      />
+      <GameLoading manifest={{ id: id, slug: id, name: '加载中...', version: '1.0', entry: '' }} />
     )
   }
 
@@ -70,7 +71,7 @@ function GameRuntimePage() {
 
   return (
     <GameContainer
-      gameId={gameId}
+      gameId={id}
       manifest={manifest}
       onComplete={handleComplete}
       onError={handleError}

@@ -1,0 +1,40 @@
+{
+  "id": "draw-guess",
+  "slug": "draw-guess",
+  "name": "AI画图猜词",
+  "version": "1.0.0",
+  "description": "AI生成趣味图像，考验你的想象力！根据AI绘制的图像，猜出对应的词语。",
+  "author": "AI Game Platform",
+  "category": ["休闲", "益智", "AI"],
+  "tags": ["ai", "guess", "drawing", "casual"],
+  "entry": "/games/draw-guess/index.html",
+  "icon": "/games/draw-guess/icon.png",
+  "thumbnail": "/games/draw-guess/thumbnail.png",
+  "banner": "/games/draw-guess/banner.png",
+  "config": {
+    "maxPlayers": 1,
+    "avgDuration": 5,
+    "difficulty": "easy",
+    "orientation": "portrait",
+    "minAge": 6
+  },
+  "aiRequirements": {
+    "llm": {
+      "enabled": true,
+      "model": "qwen3-coder-plus",
+      "avgRequests": 5
+    },
+    "imageGen": {
+      "enabled": true,
+      "model": "default",
+      "avgRequests": 10
+    },
+    "speech": {
+      "enabled": false
+    }
+  },
+  "permissions": ["user.info", "storage", "ai.text", "ai.image"],
+  "assets": {
+    "preload": []
+  }
+}

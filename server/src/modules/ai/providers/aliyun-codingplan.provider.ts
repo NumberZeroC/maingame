@@ -1,4 +1,12 @@
-import { AIProviderType, AIModel, ChatMessage, ChatOptions, ChatResult } from '../interfaces'
+import {
+  AIProviderType,
+  AIModel,
+  ChatMessage,
+  ChatOptions,
+  ChatResult,
+  ImageGenerationOptions,
+  ImageGenerationResult,
+} from '../interfaces'
 import { OpenAICompatibleProvider } from './openai-compatible.provider'
 
 export class AliyunCodingPlanProvider extends OpenAICompatibleProvider {
@@ -29,6 +37,14 @@ export class AliyunCodingPlanProvider extends OpenAICompatibleProvider {
       type: 'chat',
       maxTokens: 32768,
       pricing: { input: 0.004, output: 0.008, unit: 'per_1k_tokens' },
+    },
+    {
+      id: 'wanx-v1',
+      name: 'Wanx V1 (Image Generation)',
+      provider: AIProviderType.ALIYUN_CODINGPLAN,
+      type: 'image',
+      maxTokens: 0,
+      pricing: { input: 0.08, output: 0, unit: 'per_image' },
     },
     {
       id: 'glm-5',
@@ -78,8 +94,90 @@ export class AliyunCodingPlanProvider extends OpenAICompatibleProvider {
 
   getModelPricing(
     model: string
-  ): { input: number; output: number; unit: 'per_1k_tokens' | 'per_1m_tokens' } | null {
+  ): {
+    input: number
+    output: number
+    unit: 'per_1k_tokens' | 'per_1m_tokens' | 'per_image'
+  } | null {
     const found = AliyunCodingPlanProvider.MODELS.find((m) => m.id === model)
     return found?.pricing || null
+  }
+
+  async generateImage(
+    prompt: string,
+    options?: ImageGenerationOptions
+  ): Promise<ImageGenerationResult> {
+    const model = options?.model || 'wanx-v1'
+
+    try {
+      const response = await this.client.post(
+        'https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis',
+        {
+          model,
+          input: { prompt },
+          parameters: {
+            style: options?.style || '<auto>',
+            size: options?.size || '1024*1024',
+            n: options?.n || 1,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'X-DashScope-Async': 'enable',
+          },
+        }
+      )
+
+      const taskId = response.data.output?.task_id
+      if (taskId) {
+        const resultUrl = await this.waitForImageTask(taskId)
+        return {
+          url: resultUrl,
+          model,
+          provider: this.type,
+          cost: 0.08,
+        }
+      }
+
+      throw new Error('Image generation failed: no task_id returned')
+    } catch (error: any) {
+      this.handleError(error, 'Image generation')
+    }
+  }
+
+  private async waitForImageTask(taskId: string): Promise<string> {
+    const maxAttempts = 30
+    const delayMs = 2000
+
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        const response = await this.client.get(
+          `https://dashscope.aliyuncs.com/api/v1/tasks/${taskId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.apiKey}`,
+            },
+          }
+        )
+
+        if (response.data.output?.task_status === 'SUCCEEDED') {
+          return response.data.output.results?.[0]?.url || ''
+        }
+
+        if (response.data.output?.task_status === 'FAILED') {
+          throw new Error('Image generation task failed')
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+      } catch (error: any) {
+        if (i === maxAttempts - 1) {
+          throw error
+        }
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+      }
+    }
+
+    throw new Error('Image generation timeout')
   }
 }

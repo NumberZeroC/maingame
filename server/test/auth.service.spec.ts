@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AuthService } from '../src/modules/auth/auth.service'
 import { UsersService } from '../src/modules/users/users.service'
 import { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
 import { UnauthorizedException } from '@nestjs/common'
 import * as bcrypt from 'bcryptjs'
 
@@ -35,11 +36,16 @@ describe('AuthService', () => {
       sign: jest.fn(),
     }
 
+    const mockConfigService = {
+      get: jest.fn().mockReturnValue('30d'),
+    }
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UsersService, useValue: mockUsersService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile()
 
@@ -104,6 +110,7 @@ describe('AuthService', () => {
 
       expect(result).toEqual({
         accessToken: 'mock-jwt-token',
+        refreshToken: 'mock-jwt-token',
         user: userWithoutPassword,
       })
       expect(jwtService.sign).toHaveBeenCalledWith({

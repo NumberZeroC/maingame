@@ -16,6 +16,7 @@ import { AIConfigService } from './ai-config.service'
 import { AIConfigFileService } from './ai-config-file.service'
 import {
   AliyunCodingPlanProvider,
+  AliyunDashScopeProvider,
   ZhipuProvider,
   DeepSeekProvider,
   OpenAIProvider,
@@ -32,6 +33,7 @@ interface GameQuota {
 export class AICoreService {
   private readonly logger = new Logger(AICoreService.name)
   private readonly providers: Map<AIProviderType, AIProviderInterface> = new Map()
+  private readonly imageProviders: Map<AIProviderType, AIProviderInterface> = new Map()
   private readonly requestCounts: Map<string, { count: number; resetAt: number }> = new Map()
   private readonly tokenCounts: Map<string, { count: number; resetAt: number }> = new Map()
   private readonly totalUsageStats: Map<AIProviderType, UsageStats> = new Map()
@@ -52,6 +54,79 @@ export class AICoreService {
       usedToday: 0,
       lastReset: new Date(),
     })
+  }
+
+  private initializeProviders(): void {
+    const enabledProviders = this.configService.getEnabledProviders()
+
+    for (const providerType of enabledProviders) {
+      const providerConfig = this.configService.getProviderConfig(providerType)
+      if (!providerConfig || !providerConfig.enabled) continue
+
+      try {
+        let provider: AIProviderInterface
+
+        switch (providerType) {
+          case AIProviderType.ALIYUN_CODINGPLAN:
+            provider = new AliyunCodingPlanProvider(
+              providerConfig.apiKey,
+              providerConfig.apiSecret,
+              providerConfig.model,
+              providerConfig.baseUrl
+            )
+            if (providerConfig.imageApiKey) {
+              const imageProvider = new AliyunDashScopeProvider(
+                providerConfig.imageApiKey,
+                providerConfig.imageBaseUrl,
+                providerConfig.imageFallbackModels
+              )
+              this.imageProviders.set(providerType, imageProvider)
+              this.logger.log(
+                `Initialized image provider: ${providerType} with model ${providerConfig.imageModel}`
+              )
+            }
+            break
+          case AIProviderType.ZHIPU:
+            provider = new ZhipuProvider(
+              providerConfig.apiKey,
+              providerConfig.apiSecret,
+              providerConfig.model,
+              providerConfig.baseUrl
+            )
+            break
+          case AIProviderType.DEEPSEEK:
+            provider = new DeepSeekProvider(
+              providerConfig.apiKey,
+              providerConfig.apiSecret,
+              providerConfig.model,
+              providerConfig.baseUrl
+            )
+            break
+          case AIProviderType.OPENAI:
+            provider = new OpenAIProvider(
+              providerConfig.apiKey,
+              providerConfig.apiSecret,
+              providerConfig.model,
+              providerConfig.baseUrl
+            )
+            break
+          default:
+            this.logger.warn(`Unknown provider type: ${providerType}`)
+            continue
+        }
+
+        if (provider.isAvailable()) {
+          this.providers.set(providerType, provider)
+          this.logger.log(`Initialized AI provider: ${providerType}`)
+        }
+      } catch (error) {
+        this.logger.error(`Failed to initialize provider ${providerType}: ${error}`)
+      }
+    }
+
+    if (this.providers.size === 0) {
+      this.logger.warn('No AI providers initialized. AI features may not work.')
+    }
   }
 
   private getGameQuota(gameId: string): GameQuota {
@@ -211,13 +286,51 @@ export class AICoreService {
     options?: ImageGenerationOptions,
     gameId?: string
   ): Promise<ImageGenerationResult> {
-    return this.executeWithFallback(
-      async (provider) => {
+    if (gameId && !this.checkGameQuota(gameId)) {
+      throw new Error(`Game ${gameId} has exceeded daily AI quota`)
+    }
+
+    const fallbackOrder = this.configFileService.getFallbackOrder()
+    const errors: Error[] = []
+
+    for (const providerType of fallbackOrder) {
+      const imageProvider = this.imageProviders.get(providerType)
+      if (imageProvider && imageProvider.isAvailable()) {
+        try {
+          this.logger.debug(`Generating image with image provider: ${providerType}`)
+          const result = await imageProvider.generateImage(prompt, options)
+
+          if (gameId) {
+            this.incrementGameQuota(gameId)
+          }
+
+          return result
+        } catch (error: any) {
+          this.logger.error(`Image generation failed with ${providerType}: ${error.message}`)
+          errors.push(error)
+        }
+      }
+
+      const provider = this.providers.get(providerType)
+      if (!provider) continue
+
+      try {
+        this.logger.debug(`Generating image with provider: ${providerType}`)
         const result = await provider.generateImage(prompt, options)
+
+        if (gameId) {
+          this.incrementGameQuota(gameId)
+        }
+
         return result
-      },
-      'generateImage',
-      gameId
+      } catch (error: any) {
+        this.logger.error(`Image generation failed with ${providerType}: ${error.message}`)
+        errors.push(error)
+      }
+    }
+
+    throw new Error(
+      `All AI providers failed for generateImage. Errors: ${errors.map((e) => e.message).join('; ')}`
     )
   }
 
@@ -287,7 +400,11 @@ export class AICoreService {
   reloadProviders(): void {
     this.logger.log('Reloading AI providers...')
     this.providers.clear()
+    this.imageProviders.clear()
     this.initializeProviders()
     this.logger.log(`Providers reloaded: ${Array.from(this.providers.keys()).join(', ')}`)
+    this.logger.log(
+      `Image providers reloaded: ${Array.from(this.imageProviders.keys()).join(', ')}`
+    )
   }
 }

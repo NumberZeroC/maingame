@@ -130,7 +130,11 @@ export abstract class OpenAICompatibleProvider extends BaseAIProvider {
 
   getModelPricing(
     model: string
-  ): { input: number; output: number; unit: 'per_1k_tokens' | 'per_1m_tokens' } | null {
+  ): {
+    input: number
+    output: number
+    unit: 'per_1k_tokens' | 'per_1m_tokens' | 'per_image'
+  } | null {
     const models = (this.constructor as typeof OpenAICompatibleProvider).MODELS
     const found = models.find((m) => m.id === model)
     return found?.pricing || null
