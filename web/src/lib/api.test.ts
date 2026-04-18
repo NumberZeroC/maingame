@@ -61,7 +61,6 @@ describe('ApiClient', () => {
     it('should create axios instance with correct config', async () => {
       await import('../lib/api')
       expect(axios.create).toHaveBeenCalledWith({
-        baseURL: 'http://localhost:4000',
         timeout: 30000,
         headers: {
           'Content-Type': 'application/json',

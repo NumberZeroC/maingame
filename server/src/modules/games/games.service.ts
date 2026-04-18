@@ -22,7 +22,10 @@ export class GamesService {
   }
 
   async findOne(id: string): Promise<Game | null> {
-    return this.gameModel.findById(id).exec()
+    if (Types.ObjectId.isValid(id)) {
+      return this.gameModel.findById(id).exec()
+    }
+    return this.gameModel.findOne({ slug: id }).exec()
   }
 
   async findBySlug(slug: string): Promise<Game | null> {

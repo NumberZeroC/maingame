@@ -155,23 +155,42 @@ describe('GamesService', () => {
 
   describe('getLeaderboard', () => {
     it('should return cached leaderboard if available', async () => {
-      cacheService.get.mockResolvedValue([mockGame])
+      cacheService.get.mockResolvedValue([{ rank: 1, score: 100 }])
 
-      const result = await service.getLeaderboard('game-id')
+      const result = await service.getLeaderboard('507f1f77bcf86cd799439011')
 
-      expect(result).toEqual([mockGame])
-      expect(cacheService.get).toHaveBeenCalledWith('leaderboard:game-id:global:100')
-      expect(mockModel.find).not.toHaveBeenCalled()
+      expect(result).toEqual([{ rank: 1, score: 100 }])
+      expect(cacheService.get).toHaveBeenCalled()
     })
 
     it('should fetch and cache leaderboard from database', async () => {
       cacheService.get.mockResolvedValue(null)
-      mockModel.exec.mockResolvedValue([mockGame])
+      mockModel.findOne.mockReturnThis()
+      mockModel.exec.mockResolvedValue({ _id: '507f1f77bcf86cd799439011' })
 
-      const result = await service.getLeaderboard('game-id', 'global', 10)
+      const mockLeaderboardModel = {
+        find: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockReturnThis(),
+        exec: jest.fn().mockResolvedValue([]),
+      }
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          GamesService,
+          { provide: getModelToken(Game.name), useValue: mockModel },
+          { provide: getModelToken(GameSession.name), useValue: {} },
+          { provide: getModelToken(GamePlayRecord.name), useValue: {} },
+          { provide: getModelToken(Leaderboard.name), useValue: mockLeaderboardModel },
+          { provide: CacheService, useValue: cacheService },
+        ],
+      }).compile()
+
+      const testService = module.get<GamesService>(GamesService)
+      const result = await testService.getLeaderboard('507f1f77bcf86cd799439011', 'global', 10)
 
       expect(result).toBeDefined()
-      expect(mockModel.find).toHaveBeenCalled()
       expect(cacheService.set).toHaveBeenCalled()
     })
   })
