@@ -1,3 +1,7 @@
+import { config as dotenvConfig } from 'dotenv'
+import { resolve } from 'path'
+dotenvConfig({ path: resolve(__dirname, '../../../.env') })
+
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'

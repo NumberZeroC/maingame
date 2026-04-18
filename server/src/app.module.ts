@@ -11,6 +11,8 @@ import { GamesModule } from './modules/games/games.module'
 import { DrawGuessModule } from './modules/games/draw-guess/draw-guess.module'
 import { AiModule } from './modules/ai/ai.module'
 import { HealthModule } from './modules/health/health.module'
+import { AchievementsModule } from './modules/achievements/achievements.module'
+import { SocialModule } from './modules/social/social.module'
 import { config } from './config/config'
 
 @Module({
@@ -42,6 +44,8 @@ import { config } from './config/config'
     DrawGuessModule,
     AiModule,
     HealthModule,
+    AchievementsModule,
+    SocialModule,
   ],
   providers: [
     {

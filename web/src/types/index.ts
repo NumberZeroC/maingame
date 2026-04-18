@@ -46,6 +46,7 @@ export interface UpdateUserRequest {
 export interface Game {
   _id: string
   name: string
+  slug?: string
   description?: string
   category?: string[]
   version?: string

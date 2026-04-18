@@ -92,7 +92,7 @@ describe('useGames hooks', () => {
     })
 
     it('should not fetch when id is empty', async () => {
-      vi.mocked(gameService.gameService.getGameById).mockResolvedValue(null)
+      vi.mocked(gameService.gameService.getGameById).mockResolvedValue(undefined as any)
 
       const { result } = renderHook(() => useGetGame(''), {
         wrapper: createWrapper(),

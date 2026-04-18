@@ -4,6 +4,7 @@ import { useAuthStore } from './stores/authStore'
 import { useGetMe } from './hooks/useUser'
 import { ErrorBoundary } from './common'
 import HomePage from './pages/HomePage'
+import GamesPage from './pages/GamesPage'
 import GameRuntimePage from './pages/GameRuntimePage'
 import GameDetailPage from './pages/GameDetailPage'
 import LeaderboardPage from './pages/LeaderboardPage'
@@ -51,6 +52,7 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/" element={<Layout />}>
               <Route index element={<HomePage />} />
+              <Route path="games" element={<GamesPage />} />
               <Route path="game/:id" element={<GameDetailPage />} />
               <Route path="play/:id" element={<GameRuntimePage />} />
               <Route path="leaderboard" element={<LeaderboardPage />} />

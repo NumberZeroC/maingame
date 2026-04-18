@@ -4,8 +4,8 @@ import { connect } from 'mongoose'
 import * as bcrypt from 'bcryptjs'
 import { User } from '../src/modules/users/user.entity'
 import { config } from 'dotenv'
-
-config()
+import { resolve } from 'path'
+config({ path: resolve(__dirname, '../../.env') })
 
 const AppDataSource = new DataSource({
   type: 'postgres',

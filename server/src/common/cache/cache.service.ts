@@ -12,11 +12,14 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     const host = this.configService.get<string>('app.redis.host') || 'localhost'
     const port = this.configService.get<number>('app.redis.port') || 6379
+    const password = this.configService.get<string>('app.redis.password') || ''
 
     try {
-      this.client = createClient({
-        url: `redis://${host}:${port}`,
-      })
+      const url = password
+        ? `redis://:${password}@${host}:${port}`
+        : `redis://${host}:${port}`
+
+      this.client = createClient({ url })
 
       this.client.on('error', (err) => {
         console.error('Redis Client Error:', err)
