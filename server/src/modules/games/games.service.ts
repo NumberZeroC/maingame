@@ -30,7 +30,12 @@ export class GamesService {
   }
 
   async getManifest(id: string): Promise<any> {
-    const game = await this.gameModel.findById(id).exec()
+    let game = null
+    if (Types.ObjectId.isValid(id)) {
+      game = await this.gameModel.findById(id).exec()
+    } else {
+      game = await this.gameModel.findOne({ slug: id }).exec()
+    }
     if (!game) return null
     return (
       game.manifest || {
@@ -81,16 +86,28 @@ export class GamesService {
     return games
   }
 
+  private async resolveGameId(idOrSlug: string): Promise<Types.ObjectId | null> {
+    if (Types.ObjectId.isValid(idOrSlug)) {
+      return new Types.ObjectId(idOrSlug)
+    }
+    const game = await this.gameModel.findOne({ slug: idOrSlug }).exec()
+    return game ? (game._id as Types.ObjectId) : null
+  }
+
   async getGameSession(userId: string, gameId: string): Promise<GameSession | null> {
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) return null
     return this.sessionModel
-      .findOne({ userId: new Types.ObjectId(userId), gameId: new Types.ObjectId(gameId) })
+      .findOne({ userId: new Types.ObjectId(userId), gameId: resolvedId })
       .exec()
   }
 
   async saveGameSession(userId: string, gameId: string, key: string, value: any): Promise<void> {
-    const session = await this.sessionModel
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) return
+    await this.sessionModel
       .findOneAndUpdate(
-        { userId: new Types.ObjectId(userId), gameId: new Types.ObjectId(gameId) },
+        { userId: new Types.ObjectId(userId), gameId: resolvedId },
         { $set: { [`saveData.${key}`]: value, lastPlayedAt: new Date() } },
         { upsert: true, new: true }
       )
@@ -105,9 +122,11 @@ export class GamesService {
   }
 
   async clearGameSession(userId: string, gameId: string): Promise<void> {
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) return
     await this.sessionModel
       .updateOne(
-        { userId: new Types.ObjectId(userId), gameId: new Types.ObjectId(gameId) },
+        { userId: new Types.ObjectId(userId), gameId: resolvedId },
         { $set: { saveData: {} } }
       )
       .exec()
@@ -118,13 +137,16 @@ export class GamesService {
     gameId: string,
     result: { score?: number; duration?: number; data?: any; achievements?: string[] }
   ): Promise<void> {
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) return
+
     const { score = 0, duration = 0, data, achievements = [] } = result
 
     const sessionId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 
     await this.recordModel.create({
       userId: new Types.ObjectId(userId),
-      gameId: new Types.ObjectId(gameId),
+      gameId: resolvedId,
       sessionId,
       score,
       duration,
@@ -136,7 +158,7 @@ export class GamesService {
 
     await this.sessionModel
       .findOneAndUpdate(
-        { userId: new Types.ObjectId(userId), gameId: new Types.ObjectId(gameId) },
+        { userId: new Types.ObjectId(userId), gameId: resolvedId },
         {
           $set: { lastPlayedAt: new Date() },
           $inc: { totalPlayTime: duration },
@@ -148,7 +170,7 @@ export class GamesService {
       .exec()
 
     await this.gameModel
-      .findByIdAndUpdate(gameId, {
+      .findByIdAndUpdate(resolvedId, {
         $inc: { 'stats.playCount': 1, 'stats.avgDuration': duration },
       })
       .exec()
@@ -161,8 +183,10 @@ export class GamesService {
     gameId: string,
     limit: number = 10
   ): Promise<GamePlayRecord[]> {
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) return []
     return this.recordModel
-      .find({ userId: new Types.ObjectId(userId), gameId: new Types.ObjectId(gameId) })
+      .find({ userId: new Types.ObjectId(userId), gameId: resolvedId })
       .sort({ finishedAt: -1 })
       .limit(limit)
       .exec()
@@ -183,10 +207,13 @@ export class GamesService {
     score: number,
     extraData?: Record<string, any>
   ): Promise<Leaderboard> {
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) throw new Error('Game not found')
+
     await this.cacheService.del(`${LEADERBOARD_CACHE_KEY}:${gameId}`)
 
     const existing = await this.leaderboardModel
-      .findOne({ userId: new Types.ObjectId(userId), gameId: new Types.ObjectId(gameId) })
+      .findOne({ userId: new Types.ObjectId(userId), gameId: resolvedId })
       .exec()
 
     if (existing) {
@@ -201,7 +228,7 @@ export class GamesService {
 
     const entry = new this.leaderboardModel({
       userId: new Types.ObjectId(userId),
-      gameId: new Types.ObjectId(gameId),
+      gameId: resolvedId,
       score,
       extraData,
       playedAt: new Date(),
@@ -214,12 +241,15 @@ export class GamesService {
     type: string = 'global',
     limit: number = 100
   ): Promise<any[]> {
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) return []
+
     const cacheKey = `${LEADERBOARD_CACHE_KEY}:${gameId}:${type}:${limit}`
     const cached = await this.cacheService.get<any[]>(cacheKey)
     if (cached) return cached
 
     const entries = await this.leaderboardModel
-      .find({ gameId: new Types.ObjectId(gameId) })
+      .find({ gameId: resolvedId })
       .sort({ score: -1 })
       .limit(limit)
       .populate('userId', 'nickname avatar')
@@ -240,8 +270,11 @@ export class GamesService {
   }
 
   async getUserRank(userId: string, gameId: string): Promise<{ rank: number; score: number }> {
+    const resolvedId = await this.resolveGameId(gameId)
+    if (!resolvedId) return { rank: -1, score: 0 }
+
     const userEntry = await this.leaderboardModel
-      .findOne({ userId: new Types.ObjectId(userId), gameId: new Types.ObjectId(gameId) })
+      .findOne({ userId: new Types.ObjectId(userId), gameId: resolvedId })
       .exec()
 
     if (!userEntry) {
@@ -250,7 +283,7 @@ export class GamesService {
 
     const higherCount = await this.leaderboardModel
       .countDocuments({
-        gameId: new Types.ObjectId(gameId),
+        gameId: resolvedId,
         score: { $gt: userEntry.score },
       })
       .exec()
