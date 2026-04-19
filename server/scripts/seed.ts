@@ -319,7 +319,12 @@ async function seedGames(mongooseConnection: any) {
   for (const gameData of games) {
     const existing = await GameModel.findOne({ slug: gameData.slug })
     if (existing) {
-      console.log(`Game ${gameData.slug} already exists, skipping...`)
+      console.log(`Game ${gameData.slug} already exists, updating status...`)
+      existing.status = 'published'
+      existing.manifest = gameData.manifest
+      existing.aiRequirements = gameData.aiRequirements
+      existing.stats = gameData.stats
+      await existing.save()
       continue
     }
     await GameModel.create(gameData)
