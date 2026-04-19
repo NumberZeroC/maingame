@@ -273,6 +273,47 @@ async function seedGames(mongooseConnection: any) {
         speech: { enabled: false },
       },
     },
+    {
+      name: 'AI侦探推理',
+      slug: 'detective-game',
+      description: 'AI生成神秘案件，你扮演侦探通过多轮对话询问嫌疑人、调查线索，最终破解案件！',
+      category: ['益智', 'AI', '推理', '多轮'],
+      version: '1.0.0',
+      thumbnail: 'https://picsum.photos/seed/detective-game/400/300',
+      banner: 'https://picsum.photos/seed/detective-game-banner/800/400',
+      entry: '/games/detective-game/index.html',
+      status: 'published',
+      publishedAt: new Date(),
+      stats: { playCount: 0, avgDuration: 0, avgScore: 0, likeCount: 0, rating: 4.9 },
+      manifest: {
+        id: 'detective-game',
+        slug: 'detective-game',
+        name: 'AI侦探推理',
+        version: '1.0.0',
+        entry: '/games/detective-game/index.html',
+        thumbnail: 'https://picsum.photos/seed/detective-game/400/300',
+        description: 'AI生成神秘案件，你来破解！',
+        category: ['益智', 'AI', '推理', '多轮'],
+        config: {
+          maxPlayers: 1,
+          avgDuration: 15,
+          difficulty: 'medium',
+          orientation: 'portrait',
+          minAge: 12,
+        },
+        aiRequirements: {
+          llm: { enabled: true, model: 'qwen3-coder-plus', avgRequests: 30 },
+          imageGen: { enabled: false },
+          speech: { enabled: false },
+        },
+        permissions: ['user.info', 'storage', 'ai.text'],
+      },
+      aiRequirements: {
+        llm: { enabled: true, model: 'qwen3-coder-plus', avgRequests: 30 },
+        imageGen: { enabled: false },
+        speech: { enabled: false },
+      },
+    },
   ]
 
   for (const gameData of games) {

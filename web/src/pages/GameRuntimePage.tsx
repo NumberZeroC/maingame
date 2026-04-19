@@ -7,12 +7,14 @@ import { NumberGuessGame } from '../games/number-guess'
 import { WordChainGame } from '../games/word-chain'
 import { TwentyQuestionsGame } from '../games/twenty-questions'
 import { DrawGuessGame } from '../games/draw-guess'
+import { DetectiveGame } from '../games/detective-game'
 
 const INTERNAL_GAMES: Record<string, React.ComponentType> = {
   'number-guess': NumberGuessGame,
   'word-chain': WordChainGame,
   'twenty-questions': TwentyQuestionsGame,
   'draw-guess': DrawGuessGame,
+  'detective-game': DetectiveGame,
 }
 
 function GameRuntimePage() {

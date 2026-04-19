@@ -17,6 +17,7 @@ import { DrawGuessModule } from './draw-guess/draw-guess.module'
 import { NumberGuessModule } from './number-guess/number-guess.module'
 import { WordChainModule } from './word-chain/word-chain.module'
 import { TwentyQuestionsModule } from './twenty-questions/twenty-questions.module'
+import { DetectiveGameModule } from './detective-game/detective-game.module'
 
 @Module({
   imports: [
@@ -31,9 +32,10 @@ import { TwentyQuestionsModule } from './twenty-questions/twenty-questions.modul
     NumberGuessModule,
     WordChainModule,
     TwentyQuestionsModule,
+    DetectiveGameModule,
   ],
   controllers: [GamesController],
   providers: [GamesService],
-  exports: [GamesService, DrawGuessModule, NumberGuessModule, WordChainModule, TwentyQuestionsModule],
+  exports: [GamesService, DrawGuessModule, NumberGuessModule, WordChainModule, TwentyQuestionsModule, DetectiveGameModule],
 })
 export class GamesModule {}
