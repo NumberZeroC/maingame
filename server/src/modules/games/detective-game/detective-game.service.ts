@@ -259,11 +259,14 @@ ${suspect.isCulprit ? '你是凶手，要隐藏真相，但回答中可以有细
     const game = await this.gameModel.findOne({
       _id: gameId,
       userId,
-      status: 'playing',
     })
 
     if (!game) {
-      throw new Error('Game not found or already completed')
+      throw new Error('Game not found')
+    }
+
+    if (game.status !== 'playing') {
+      throw new Error(`游戏已结束 (${game.status === 'solved' ? '已破解' : '失败'})`)
     }
 
     const clue = game.clues.find((c) => c.id === clueId)
@@ -275,14 +278,12 @@ ${suspect.isCulprit ? '你是凶手，要隐藏真相，但回答中可以有细
       throw new Error('该线索已被调查')
     }
 
-    if (game.investigationPoints <= 0) {
-      game.status = 'failed'
-      game.completedAt = new Date()
-      await game.save()
-      throw new Error('调查点数耗尽')
+    const cost = clue.importance === 'critical' ? 20 : clue.importance === 'major' ? 15 : 10
+    
+    if (game.investigationPoints < cost) {
+      throw new Error(`调查点数不足。需要${cost}点，当前只有${game.investigationPoints}点`)
     }
 
-    const cost = clue.importance === 'critical' ? 20 : clue.importance === 'major' ? 15 : 10
     game.investigationPoints -= cost
 
     const discovery = await this.generateClueDiscovery(clue, game)

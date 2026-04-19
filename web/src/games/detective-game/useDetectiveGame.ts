@@ -86,7 +86,24 @@ const questionSuspect = useCallback(
 
   const investigateClue = useCallback(
     async (clueId: string) => {
-      if (!game || status !== 'playing') return
+      if (!game) return
+      
+      if (game.status !== 'playing') {
+        setError('游戏已结束')
+        return
+      }
+
+      const clue = game.clues.find(c => c.id === clueId)
+      if (!clue || clue.discovered) {
+        setError('线索不存在或已调查')
+        return
+      }
+
+      const cost = clue.importance === 'critical' ? 20 : clue.importance === 'major' ? 15 : 10
+      if (game.investigationPoints < cost) {
+        setError(`调查点数不足（需要${cost}点）`)
+        return
+      }
 
       try {
         const result = await detectiveGameService.investigateClue(game._id, clueId)
@@ -98,12 +115,9 @@ const questionSuspect = useCallback(
         }
       } catch (err: any) {
         setError(err.message || 'Failed to investigate clue')
-        if (err.message?.includes('调查点数耗尽')) {
-          setStatus('failed')
-        }
       }
     },
-    [game, status]
+    [game]
   )
 
   const makeDeduction = useCallback(
