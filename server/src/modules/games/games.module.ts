@@ -13,6 +13,10 @@ import {
   LeaderboardSchema,
 } from './game.schema'
 import { CacheModule } from '../../common/cache'
+import { DrawGuessModule } from './draw-guess/draw-guess.module'
+import { NumberGuessModule } from './number-guess/number-guess.module'
+import { WordChainModule } from './word-chain/word-chain.module'
+import { TwentyQuestionsModule } from './twenty-questions/twenty-questions.module'
 
 @Module({
   imports: [
@@ -23,9 +27,13 @@ import { CacheModule } from '../../common/cache'
       { name: Leaderboard.name, schema: LeaderboardSchema },
     ]),
     CacheModule,
+    DrawGuessModule,
+    NumberGuessModule,
+    WordChainModule,
+    TwentyQuestionsModule,
   ],
   controllers: [GamesController],
   providers: [GamesService],
-  exports: [GamesService],
+  exports: [GamesService, DrawGuessModule, NumberGuessModule, WordChainModule, TwentyQuestionsModule],
 })
 export class GamesModule {}
