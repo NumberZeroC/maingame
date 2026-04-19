@@ -24,12 +24,18 @@ function DetectiveGameComponent() {
   const [showAccuseModal, setShowAccuseModal] = useState(false)
   const [accuseSuspectId, setAccuseSuspectId] = useState<string | null>(null)
   const [isInvestigating, setIsInvestigating] = useState(false)
+  const [isQuestioning, setIsQuestioning] = useState(false)
 
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedSuspect || !question.trim()) return
-    await questionSuspect(selectedSuspect.id, question.trim())
-    setQuestion('')
+    if (!selectedSuspect || !question.trim() || isQuestioning) return
+    setIsQuestioning(true)
+    try {
+      await questionSuspect(selectedSuspect.id, question.trim())
+      setQuestion('')
+    } finally {
+      setIsQuestioning(false)
+    }
   }
 
   const handleInvestigate = async (clueId: string) => {
@@ -239,9 +245,9 @@ function DetectiveGameComponent() {
                         <button
                           type="submit"
                           className="btn btn-primary btn-sm"
-                          disabled={!question.trim()}
+                          disabled={!question.trim() || isQuestioning}
                         >
-                          询问
+                          {isQuestioning ? '询问中...' : '询问'}
                         </button>
                       </div>
                     </form>
