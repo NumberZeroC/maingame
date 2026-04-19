@@ -3,10 +3,21 @@ import { useQuery } from '@tanstack/react-query'
 import { GameContainer, GameLoading } from '../components/GameRuntime'
 import { gameService } from '../services/gameService'
 import { GameManifest, GameSDKError, GameResult } from '../sdk'
+import { NumberGuessGame } from '../games/number-guess'
+import { WordChainGame } from '../games/word-chain'
+import { TwentyQuestionsGame } from '../games/twenty-questions'
+
+const INTERNAL_GAMES: Record<string, React.ComponentType> = {
+  'number-guess': NumberGuessGame,
+  'word-chain': WordChainGame,
+  'twenty-questions': TwentyQuestionsGame,
+}
 
 function GameRuntimePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+
+  const isInternalGame = id && INTERNAL_GAMES[id]
 
   const {
     data: manifest,
@@ -21,7 +32,7 @@ function GameRuntimePage() {
       const response = await gameService.getGameManifest(game._id)
       return response
     },
-    enabled: !!id,
+    enabled: !!id && !isInternalGame,
   })
 
   const handleComplete = (result: GameResult) => {
@@ -47,6 +58,11 @@ function GameRuntimePage() {
         </div>
       </div>
     )
+  }
+
+  if (isInternalGame) {
+    const GameComponent = INTERNAL_GAMES[id]
+    return <GameComponent />
   }
 
   if (isLoading) {
