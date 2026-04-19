@@ -23,6 +23,7 @@ function DetectiveGameComponent() {
   const [reasoning, setReasoning] = useState('')
   const [showAccuseModal, setShowAccuseModal] = useState(false)
   const [accuseSuspectId, setAccuseSuspectId] = useState<string | null>(null)
+  const [isInvestigating, setIsInvestigating] = useState(false)
 
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,7 +33,13 @@ function DetectiveGameComponent() {
   }
 
   const handleInvestigate = async (clueId: string) => {
-    await investigateClue(clueId)
+    if (isInvestigating) return
+    setIsInvestigating(true)
+    try {
+      await investigateClue(clueId)
+    } finally {
+      setIsInvestigating(false)
+    }
   }
 
   const handleDeductionSubmit = async (e: React.FormEvent) => {
@@ -290,8 +297,9 @@ function DetectiveGameComponent() {
                           <button
                             onClick={() => handleInvestigate(clue.id)}
                             className="text-xs btn btn-secondary btn-xs"
+                            disabled={isInvestigating}
                           >
-                            调查
+                            {isInvestigating ? '调查中...' : '调查'}
                           </button>
                         )}
                       </div>
