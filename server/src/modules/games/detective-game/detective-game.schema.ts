@@ -70,7 +70,7 @@ export class DetectiveGame extends Document {
   @Prop({ type: [String], default: [] })
   discoveredClues: string[]
 
-  @Prop({ type: [Object], default: [] })
+  @Prop({ type: [{ statement: String, timestamp: Date, correct: Boolean }] })
   deductions: Array<{ statement: string; timestamp: Date; correct: boolean }>
 
   @Prop()
