@@ -62,7 +62,7 @@ export function useDetectiveGame(): UseDetectiveGameReturn {
     setSelectedSuspect(null)
   }, [])
 
-  const questionSuspect = useCallback(
+const questionSuspect = useCallback(
     async (suspectId: string, question: string) => {
       if (!game || status !== 'playing') return
 
@@ -72,10 +72,13 @@ export function useDetectiveGame(): UseDetectiveGameReturn {
         setMessage(result.response)
 
         if (result.game.status !== 'playing') {
-          setStatus(result.game.status)
+          setStatus(result.game.status as any)
         }
       } catch (err: any) {
         setError(err.message || 'Failed to question suspect')
+        if (err.message?.includes('调查点数耗尽')) {
+          setStatus('failed')
+        }
       }
     },
     [game, status]
@@ -89,8 +92,15 @@ export function useDetectiveGame(): UseDetectiveGameReturn {
         const result = await detectiveGameService.investigateClue(game._id, clueId)
         setGame(result.game)
         setMessage(result.discovery)
+        
+        if (result.game.status !== 'playing') {
+          setStatus(result.game.status as any)
+        }
       } catch (err: any) {
         setError(err.message || 'Failed to investigate clue')
+        if (err.message?.includes('调查点数耗尽')) {
+          setStatus('failed')
+        }
       }
     },
     [game, status]

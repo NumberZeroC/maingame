@@ -38,6 +38,10 @@ function DetectiveGameComponent() {
     }
   }
 
+  const getInvestigationCost = (importance: string): number => {
+    return importance === 'critical' ? 20 : importance === 'major' ? 15 : 10
+  }
+
   const handleInvestigate = async (clueId: string) => {
     if (isInvestigating) return
     setIsInvestigating(true)
@@ -299,7 +303,7 @@ function DetectiveGameComponent() {
                             ? '重要'
                             : '次要'}
                         </span>
-                        {!clue.discovered && (
+                        {!clue.discovered && game?.investigationPoints >= getInvestigationCost(clue.importance) && (
                           <button
                             onClick={() => handleInvestigate(clue.id)}
                             className="text-xs btn btn-secondary btn-xs"
@@ -307,6 +311,9 @@ function DetectiveGameComponent() {
                           >
                             {isInvestigating ? '调查中...' : '调查'}
                           </button>
+                        )}
+                        {!clue.discovered && game?.investigationPoints < getInvestigationCost(clue.importance) && (
+                          <span className="text-xs text-gray-400">点数不足</span>
                         )}
                       </div>
                     </div>
