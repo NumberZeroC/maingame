@@ -6,11 +6,13 @@ import { GameManifest, GameSDKError, GameResult } from '../sdk'
 import { NumberGuessGame } from '../games/number-guess'
 import { WordChainGame } from '../games/word-chain'
 import { TwentyQuestionsGame } from '../games/twenty-questions'
+import { DrawGuessGame } from '../games/draw-guess'
 
 const INTERNAL_GAMES: Record<string, React.ComponentType> = {
   'number-guess': NumberGuessGame,
   'word-chain': WordChainGame,
   'twenty-questions': TwentyQuestionsGame,
+  'draw-guess': DrawGuessGame,
 }
 
 function GameRuntimePage() {
