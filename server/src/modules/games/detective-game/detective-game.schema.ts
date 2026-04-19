@@ -73,7 +73,7 @@ export class DetectiveGame extends Document {
   @Prop({ type: [{ statement: String, timestamp: Date, correct: Boolean }] })
   deductions: Array<{ statement: string; timestamp: Date; correct: boolean }>
 
-  @Prop()
+  @Prop({ type: Object, default: null })
   finalAccusation?: {
     suspectId: string
     reasoning: string
