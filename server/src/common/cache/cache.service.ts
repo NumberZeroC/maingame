@@ -15,7 +15,7 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     const password = this.configService.get<string>('app.redis.password') || ''
 
     try {
-      const url = password
+const url = password
         ? `redis://:${password}@${host}:${port}`
         : `redis://${host}:${port}`
 
